@@ -1,0 +1,366 @@
+---
+title: '<center> The Exercises of Week 2 - Exploratory Data Analysis <center>'
+author: '<center> Reza Mohammadi <center>'
+date: '<center> `r Sys.Date()` <center>'
+output:
+  html_document:
+    number_sections: true
+    fig_caption: true
+    toc: true
+    fig_width: 7
+    fig_height: 5
+    theme: cosmo
+    highlight: tango
+    code_folding: show
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk $ set( echo = TRUE, message = FALSE, warning = FALSE, 
+                         comment = " ", error = FALSE, fig.align = 'center' )
+```
+
+**Full Name:** Please write here you full name. In the case of working in a team, write the full name of all the team members. 
+
+**Online Assignments**: 
+There is a new online-assignments at the [DataCamp](https://www.datacamp.com). This online exercise, related to data visualization in **R**, e.g., by using the [*ggplot2*](https://CRAN.R-project.org/package=ggplot2) package. These exercises are useful to prepare yourself for the computer-lab. *The online-assignments at the DataCamp are not mandatory*.
+
+**Your task** is to answer the questions in this R-markdown file. Submit both your R-markdown (.Rmd) file and the HTML file on Canvas. 
+
+**Note:** The exercise of this week has 100 points. Besides, the Bonus part has 30 extra points.  
+
+# Exploratory Data Analysis for customer churn prediction (30 points)
+
+Customer Churn is a topic that matters to organizations of all sizes. 
+Customer churn occurs when customers stop doing business with a company, also known as customer attrition. Churn (loss of customers to competition) is a major problem for telecom companies because it is well known that it is more expensive to acquire a new customer than to keep an existing customer. Here, we use Exploratory Data Analysis to explore the *churn* dataset. Basically, we want to visualize and identify which factors contribute to customer churn.
+
+**Dataset**: The *churn* data set is available in the **R** package [*liver*](https://CRAN.R-project.org/package=liver). The data set contains '5000' rows (customers) and 20 columns (features). The last column called *churn*  is the target variable which indicates whether customers churned (left the company) or not. If you want to know more about the dataset just type `?churn` in your **R** console. You also can find more information about this dataset [here](https://rdrr.io/cran/liver/man/churn.html).
+
+Here we need to load the following **R** packages:
+
+* [**ggplot2**](https://CRAN.R-project.org/package=ggplot2): we use this package to visualize our data in **R**.
+* [**liver**](https://CRAN.R-project.org/package=liver): the *churn* dataset is in this package. 
+* **GGally**: We use the `ggcorr()` function from this package.
+* **psych**: We use the `pairs.panels()` function from this package.
+
+**NOTE:** If you have not installed those two packages, you should first install them.
+
+To load the packages:
+```{r}
+library( ggplot2 )  
+library( liver   )  
+library( GGally  )  
+library( psych   )  
+```
+
+## Business Understanding
+
+Companies are interested to know who is gonna get churned so they can proactively go to the customer to provide them better services and turn customers' decisions in the opposite direction. Companies are interested to know:
+
+* **What** customers are we losing?
+* **Why** are we losing them?
+* **How** do we stop them from leaving the company?
+
+To answer these questions here, as a practical example, we use the *churn* data set is available in the **R** package [*liver*](https://CRAN.R-project.org/package=liver).
+
+## Data Understanding 
+
+This dataset comes from IBM Sample Data Sets. The data set contains 5000 rows (customers) and 20 columns (features). The "churn" column is our target which indicates whether the customer churned (left the company) or not.
+The 20 variables are:
+
+* `state`: Categorical, for the 51 states and the District of Columbia.
+* `area.code`: Categorical.
+* `account.length`: count, how long account has been active.
+* `voice.plan`: Categorical, yes or no, voice mail plan.
+* `voice.messages`: Count, number of voice mail messages.
+* `intl.plan`: Categorical, yes or no, international plan.
+* `intl.mins`: Continuous, minutes customer used service to make international calls.
+* `intl.calls`: Count, total number of international calls.
+* `intl.charge`: Continuous, total international charge.
+* `day.mins`: Continuous, minutes customer used service during the day.
+* `day.calls`: Count, total number of calls during the day.
+* `day.charge`: Continuous, total charge during the day.
+* `eve.mins`: Continuous, minutes customer used service during the evening.
+* `eve.calls`: Count, total number of calls during the evening.
+* `eve.charge`: Continuous, total charge during the evening.
+* `night.mins`: Continuous, minutes customer used service during the night.
+* `night.calls`: Count, total number of calls during the night.
+* `night.charge`: Continuous, total charge during the night.
+* `customer.calls`: Count, number of calls to customer service.
+* `churn`: Categorical, yes or no. Indicator of whether the customer has left the company (yes or no).
+
+We import the dataset in **R** as follows:
+```{r}
+data( churn ) # load the "churn" dataset
+``` 
+
+To see the overview of the dataset in **R** we could use the following functions: 
+
+* `str`  to see a compact display of the structure of the data. 
+* `View` to see spreadsheet-style data. 
+* `head` to see the first part of the data (first 6 rows of the data).
+* `summary` to see the summary of each variable.
+
+To see the overview of the dataset in **R** we are using function `str` as follows:
+```{r}
+str( churn )   # Compactly display the structure of the data
+```
+
+It shows that data are as a *data.frame* object in **R** with `r nrow(churn)` observations and `r ncol(churn)` variables. The last column (with name *churn*) is the *target variable* that indicates whether customers churned (left the company) or not.
+
+By using the function `summary` in **R**, we can see the summary of the dataset as follows
+
+```{r}
+summary( churn )
+```
+It shows the summary of all the `r ncol(churn)` variables. 
+
+**a. For each variable in the churn dataset, specify its type.**
+
+**b. Based on the output of the `summary` function for the churn dataset, what is the number of customers who have an international plan (`intl.plan = "yes"`)?**
+
+## Investigate the target variable *churn* 
+
+Here we report a bar plot for the target variable `churn` by using function `ggplot()` from the **R** package **ggplot2** as follows:
+
+```{r fig.align = 'center', fig.height=5, fig.width=5}
+ggplot( data = churn ) + 
+    geom_bar( aes( x = churn ), fill = c( "red", "blue" ) ) +
+    labs( title = "Bar plot for the target variable 'churn'" )  
+```
+
+Summary for the target variable `churn`
+```{r}
+summary( churn $ churn )
+```
+
+**Based on the above output, what is the proportion of the churner (customer churn rate)?**
+
+## Investigate variable *International Plan*
+
+Here we first report a contingency table of International Plan (`intl.plan`) with `churn`
+```{r}
+table( churn $ churn, churn $ intl.plan, dnn = c( "Churn", "International Plan" ) )
+```
+
+Here is the above contingency table with margins
+```{r}
+addmargins( table( churn $ churn, churn $ intl.plan, dnn = c( "Churn", "International Plan" ) ) )
+```
+
+Bar chart for International Plan
+
+```{r fig.align = 'default', fig.show = "hold", out.width = "50%"}
+ggplot( data = churn ) + 
+  geom_bar( aes( x = intl.plan, fill = churn ) ) +
+  scale_fill_manual( values = c( "red", "blue" ) ) 
+
+ggplot( data = churn ) + 
+  geom_bar( aes( x = intl.plan, fill = churn ), position = "fill" ) +
+  scale_fill_manual( values = c( "red", "blue" ) ) 
+```
+
+**What would be your interpretation of the above plots?**
+
+## Investigate variable "*voice mail plan*"
+
+Make a table for counts of Churn and Voice Mail Plan
+
+```{r}
+table( churn $ churn, churn $ voice.plan, dnn = c( "Churn", "Voice Mail Plan" ) )
+```
+
+Bar chart for Voice Mail Plan
+
+```{r fig.align = 'default', fig.show="hold", out.width="50%"}
+ggplot( data = churn ) + 
+  geom_bar( aes( x = voice.plan, fill = churn ) ) +
+  scale_fill_manual( values = c( "red", "blue" ) ) 
+
+ggplot( data = churn ) + 
+  geom_bar( aes( x = voice.plan, fill = churn ), position = "fill" ) +
+  scale_fill_manual( values = c( "red", "blue" ) ) 
+```
+
+**What would be your interpretation of the above plots?**
+
+## Investigate variable "*customer service calls*" 
+
+Here, we are interested to investigate the relationship between variable "*customer service calls*" and the target variable "*churn*". First, we report the histogram of the variable "*customer service calls*" by using function `ggplot` as follows
+
+```{r}
+ggplot( data = churn ) +
+  geom_bar( aes( x = factor( customer.calls ) ) ) 
+```
+
+To see the relationship between variable "*customer service calls*" and the target variable "*churn*", we report the histogram of the variable "*customer service calls*" including "churn" overlay as follows
+
+```{r}
+ggplot( data = churn ) +
+  geom_bar( aes( x = factor( customer.calls ), fill = churn ), position = "stack" ) +
+  scale_fill_manual( values = c( "red", "blue" ) ) 
+```
+
+We also report the *Normalized* histogram of variable "*customer service calls*" including "churn" overlay as follow
+
+```{r}
+ggplot( data = churn ) +
+  geom_bar( aes( x = factor( customer.calls ), fill = churn ), position = "fill" ) +
+  scale_fill_manual( values = c( "red", "blue" ) ) 
+```
+
+**What would be your interpretation of the above plots?**
+
+## Investigate variable "*Day Minutes*"
+
+Here, we are interested to investigate the relationship between variable Day Minutes and the target variable *Churn*. First, we report the “Normalized” histogram of Day Minutes including Churn overlay:
+
+```{r}
+ggplot( data = churn ) +
+  geom_histogram( aes( x = day.mins, fill = churn ), position = "fill", binwidth = 25, color="white" ) +
+  scale_fill_manual( values = c( "red", "blue" ) ) 
+```
+
+Another way to see the relationship between variable Day Minutes and the target variable *churn*, would be by using the boxplot as follows
+
+```{r}
+ggplot( data = churn ) +
+  geom_boxplot( aes( x = churn, y = day.mins ), fill = c( "red", "blue" ) ) 
+```
+
+**What would be your interpretation of the above boxplot?**
+
+## Investigate variable "*International Calls*" 
+
+Here, we are interested to investigate the relationship between variable International Calls and the target variable `churn`. First, we report the histogram of the variable International Calls as follows:
+
+```{r}
+ggplot( data = churn ) +
+  geom_bar( aes( x = intl.calls ) ) 
+```
+
+To see the relationship between variable International Calls and the target variable *churn*, we report the histogram of variable International Calls including Churn overlay as follow
+
+```{r}
+ggplot( data = churn ) +
+  geom_bar( aes( x = intl.calls, fill = churn ), position = "stack" ) +
+  scale_fill_manual( values = c( "red", "blue" ) ) 
+```
+
+We also report the *Normalized* histogram of variable International Calls including Churn overlay as follow
+
+```{r}
+ggplot( data = churn ) +
+  geom_bar( aes( x = intl.calls, fill = churn ), position = "fill" ) +
+  scale_fill_manual( values = c( "red", "blue" ) ) 
+```
+
+To see the relationship between variable International Calls and the target variable *churn*, we report the boxplot as follow
+
+```{r}
+ggplot( data = churn ) +
+  geom_boxplot( aes( x = churn, y = intl.calls ), fill = c( "red", "blue" ) ) 
+```
+
+**What would be your interpretation of the above boxplot?**
+
+## Detect Correlated Variables 
+
+To visualize the correlation matrix between the "day.mins", "Day.Calls", "Day.Charge", "Eve.Mins", "Eve.Calls", "Eve.Charge", "Night.Mins", "Night.Calls", and "Night.Charge", we could use the `ggcorr` function as follows
+
+```{r message = FALSE, warning = FALSE, fig.align='center' }
+variable_list = c( "intl.mins",  "intl.calls",  "intl.charge", 
+                   "day.mins",   "day.calls",   "day.charge",
+                   "eve.mins",   "eve.calls",   "eve.charge",
+                   "night.mins", "night.calls", "night.charge" )
+
+ggcorr( data = churn[ , variable_list ], label = TRUE ) 
+```
+
+```{r fig.align = 'default', fig.show="hold", out.width="50%"}
+pairs.panels( churn[ , c( "intl.mins", "intl.calls", "intl.charge" ) ] ) 
+
+pairs.panels( churn[ , c( "day.mins", "day.calls", "day.charge" ) ] ) 
+
+pairs.panels( churn[ , c( "eve.mins", "eve.calls", "eve.charge" ) ] ) 
+
+pairs.panels( churn[ , c( "night.mins", "night.calls", "night.charge" ) ] ) 
+```
+
+**What would be your interpretation of the above correlation matrix plots?**
+
+# Exploratory Data Analysis for Bank direct marketing dataset  (70 points)
+
+In this part, we want to use Exploratory Data Analysis to explore the *bank* dataset that is available in the **R** package [**liver**](https://CRAN.R-project.org/package=liver). You could find more information about the *bank* dataset at the following link on pages 4-5: [manual of the liver package](https://cran.r-project.org/web/packages/liver/liver.pdf); Or  [here](https://rdrr.io/cran/liver/man/bank.html).
+
+## Business Understanding
+
+Find the best strategies to improve for the next marketing campaign. How can the financial institution have greater effectiveness for future marketing campaigns? To make a data-driven decision, we need to analyze the last marketing campaign the bank performed and identify the patterns that will help us find conclusions to develop future strategies.
+
+### Bank direct marketing info
+
+Two main approaches for enterprises to promote products/services are: 
+
+* *mass campaigns*: targeting general indiscriminate public,
+* *directed marketing*, targeting a specific set of contacts. 
+
+In general, positive responses to mass campaigns are typically very low (less than 1%). On the other hand, direct marketing focuses on targets that are keener to that specific product/service, making this kind of campaign more effective. However, direct marketing has some drawbacks, for instance, it may trigger a negative attitude towards banks due to the intrusion of privacy.
+
+Banks are interested to increase financial assets. One strategy is to offer attractive long-term deposit applications with good interest rates, in particular, by using directed marketing campaigns. Also, the same drivers are pressing for a reduction in costs and time. Thus, there is a need for an improvement in efficiency: lesser contacts should be done, but an approximate number of successes (clients subscribing to the deposit) should be kept.
+
+### What is a Term Deposit?
+
+A Term Deposit is a deposit that a bank or a financial institution offers with a fixed rate (often better than just opening a deposit account), in which your money will be returned at a specific maturity time. For more information with regards to Term Deposits please check [here](https://www.investopedia.com/terms/t/termdeposit.asp).
+
+## Data Undestanding
+
+The *bank* dataset is related to direct marketing campaigns of a Portuguese banking institution. You can find more information related to this dataset at: [https://rdrr.io/cran/liver/man/bank.html](https://rdrr.io/cran/liver/man/bank.html)
+
+The marketing campaigns were based on phone calls. Often, more than one contact (to the same client) was required, to access if the product (bank term deposit) would be (or not) subscribed. The classification goal is to predict if the client will subscribe to a term deposit (variable deposit).
+
+We import the *bank* dataset:
+```{r}
+data( bank )      
+```
+
+We can see the structure of the dataset by using the `str` function:
+```{r}
+str( bank )
+```
+
+It shows that the *bank* dataset as a `data.frame` has `r ncol( bank )` variables and `r nrow( bank )` observations. The dataset has `r ncol( bank ) - 1` predictors along with the target variable `deposit` which is a binary variable with 2 levels "yes" and "no". The variables in this dataset are:
+
+* `age`: numeric.
+* `job`: type of job; categorical: "admin.", "unknown", "unemployed", "management", "housemaid", "entrepreneur", "student", "blue-collar, "self-employed", "retired", "technician", "services".
+* `marital`: marital status; categorical: "married", "divorced", "single"; note: "divorced" means divorced or widowed.
+* `education`: categorical: "secondary", "primary", "tertiary", "unknown".
+* `default`: has credit in default?; binary: "yes","no".
+* `balance`: average yearly balance, in euros; numeric.
+* `housing`: has housing loan? binary: "yes", "no".
+* `loan`: has personal loan? binary: "yes", "no".
+
+Related with the last contact of the current campaign:
+
+* `contact`: contact: contact communication type; categorical: "unknown","telephone","cellular". 
+* `day`: last contact day of the month; numeric.
+* `month`: last contact month of year; categorical: "jan", "feb", "mar", ..., "nov", "dec".
+* `duration`: last contact duration, in seconds; numeric.
+
+Other attributes:
+
+* `campaign`: number of contacts performed during this campaign and for this client; numeric, includes last contact.
+* `pdays`: number of days that passed by after the client was last contacted from a previous campaign; numeric, -1 means client was not previously contacted.
+* `previous`: number of contacts performed before this campaign and for this client; numeric.
+* `poutcome`: outcome of the previous marketing campaign; categorical: "success", "failure", "unknown", "other".
+
+Target variable:
+
+* `deposit`: Indicator of whether the client subscribed a term deposit; binary: "yes" or "no".
+
+**Following Part 1, first, report the summary of the dataset then apply the Exploratory Data Analysis.**
+
+# **Bonus**: Exploratory Data Analysis for your own dataset (30 points)
+
+In this part, you could apply Exploratory Data Analysis to explore your own dataset. You could follow the same steps as in part 1 (above) of these exercises.
+
+
+
