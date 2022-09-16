@@ -5,12 +5,15 @@ Week 1
 - Introduction to Data Science
 - Introduction to R and R-Markdown
 Larose: chapters 1 & 2
+
 Week 2
-Exploratory Data Analysis
+- Exploratory Data Analysis
 Larose: chapter 3
+
 Week 3
-Statistical Inference & Hypothesis Testing
+- Statistical Inference & Hypothesis Testing
 Larose: chapters 4 & 5
+
 Week 4
 Classification & Model Evaluation
 Larose: chapters 6 & 7
