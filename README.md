@@ -1,4 +1,4 @@
-# rcourses
+# Introduction to Data Science
  Materials, solutions, and comments to assignments for the University of Amsterdam's course on Introduction to Data Science
 
 Week 1
