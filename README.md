@@ -4,6 +4,7 @@
 Week 1
 - Introduction to Data Science
 - Introduction to R and R-Markdown
+
 Larose: chapters 1 & 2
 
 Week 2
