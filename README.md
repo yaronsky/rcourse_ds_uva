@@ -15,13 +15,15 @@ Week 3
 Larose: chapters 4 & 5
 
 Week 4
-Classification & Model Evaluation
+- Classification & Model Evaluation
 Larose: chapters 6 & 7
+
 Week 5
-Decision Trees
+- Decision Trees
 Larose: chapter 8
+
 Week 6
-Regression Analysis
+-Regression Analysis
 Larose: chapter 5
 
 books:
