@@ -1,0 +1,354 @@
+---
+title: '<center> The Exercises of Week 1 <center>'
+author: '<center> Reza Mohammadi <center>'
+date: '<center> `r Sys.Date()` <center>'
+output:
+  html_document:
+    number_sections: true
+    fig_caption: true
+    toc: true
+    fig_width: 7
+    fig_height: 5
+    theme: cosmo
+    highlight: tango
+    code_folding: show
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk $ set( echo = TRUE, message = FALSE, warning = FALSE, 
+                         comment = " ", error = FALSE, fig.align = 'center'  )
+```
+
+**Full Name:** Please write here you full name. In the case of working in a team, write the full name of all the team members. 
+
+**Online Exercises on DataCamp**: 
+Register at the [DataCamp](https://www.datacamp.com) for the free online course “Data Wrangling 2022”. Three online assignments are waiting for you. Those online assignments are preparing you for the computer labs. *The online assignments at the DataCamp are not mandatory*.
+
+**Your task** is to answer the questions in this R-markdown file. Submit both your R-markdown (.Rmd) file and the HTML file on Canvas. Note that your R-markdown has to be in the right format. 
+
+# How to use R-Markdown in RStudio?
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+For a quick demo on how to use R Markdown in RStudio see: [https://www.youtube.com/embed/DNS7i2m4sB0](https://www.youtube.com/embed/DNS7i2m4sB0)
+
+Download the Rmd file with the name ‘Exercises_week1.Rmd’ at [Canvas > Week1 - Introduction to Data Science](https://canvas.uva.nl/courses/32529/assignments/336183?module_item_id=1378167) and save it in your personal computer. Open this Rmd file on your RStudio and create its HTML file by clicking on the Work space Tab on `Knit > Knit to HTML`.
+
+# Loading/Attaching **R** packages
+
+Sometimes we need some function/dataset which is not in **R**. In this case, we need to install and load the package that includes that function/dataset. Note, we need to install the package once; the next time that we open **R**, we only need to load the package. For example, here, we need to load the following R packages:
+
+* [**ggplot2**](https://CRAN.R-project.org/package=ggplot2): we use the functionality of this package for data visualization.
+* [**plyr**](https://CRAN.R-project.org/package=plyr): for function 'mutate'.
+* [**Hmisc**](https://CRAN.R-project.org/package=Hmisc): for missing vlaues.
+* [**liver**](https://CRAN.R-project.org/package=liver): the *adult* dataset is in this package. 
+
+We import the following packages in R as follows:
+```{r message = FALSE, warning = FALSE}
+library( ggplot2 )  # for diamonds dataset and ggplot function
+library( plyr    )  # for function 'mutate'.
+library( liver   )  # for adult dataset
+
+library( forcats )  # for function "fct_collapse"
+
+library( Hmisc   )  # for missing values
+library( naniar  )  # for visualizing the missing values
+```
+
+**NOTE:** If you have not installed these packages, you should first install them.
+
+So, if it is needed, install the packages. In RStudio, after clicking on the "Tools" tab, click on "Install Packages...". In the Install Packages dialog, write the package name you want to install under the Packages field and then click install. **NOTE** Please select the option "Install dependencies".
+
+**Your task here is to install these packages on our computer.**
+
+# Diamonds Dataset (50 points)
+ 
+Here we want to use the *diamonds* dataset as an example of how to deal with *unusual values*, *outliers*, and *missing values*. The *diamonds* dataset is available in the R package [**ggplot2**](https://CRAN.R-project.org/package=ggplot2). 
+
+In general, we could import the Dataset sheet from our personal computer or an online source into **R**, by using the `read.csv()` function. But, here, since the *diamonds* dataset is available in the **R** package "*ggplot2*", we import the *diamonds* dataset in **R** as follows:
+```{r}
+data( diamonds ) # loads "diamonds" data in your RStudio environment
+``` 
+
+To see the overview of the dataset in **R**, we could use the following functions: 
+
+* `str()`  to see a compact display of the structure of the data. 
+* `View()` to see spreadsheet-style data. 
+* `head()` to see the first part of the data (first 6-rows of data).
+* `summary()` to see the summary of each variable.
+
+Here we use the `str()` function to report the structure of the *diamonds* dataset as follows
+```{r}
+str( diamonds )   
+```
+
+It shows the dataset has `r nrow( diamonds )` observations and `r ncol( diamonds )` variables where:
+
+* `carat`: weight of the diamond (0.2–5.01).
+* `cut`: quality of the cut (Fair, Good, Very Good, Premium, Ideal).
+* `color`: diamond color, from D (worst) to J (best).
+* `clarity`: a measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best)).
+* `depth`: total depth percentage = `z` / mean(`x`, `y`) = 2 * `z` / (`x` + `y`).
+* `table`: width of top of diamond relative to widest point (43–95).
+* `price`: price in US dollars (\$326–\$18,823).
+* `x`: length in mm (0–10.74).
+* `y`: width in mm (0–58.9).
+* `z`: depth in mm (0–31.8).
+
+To see the first part of the data
+```{r}
+head( diamonds )   
+```
+
+You can find more information related to this dataset [here](https://ggplot2.tidyverse.org/reference/diamonds.html). 
+
+a. **Which of the variables in the dataset are *nominal*? Which ones are *Ordinal*? Which ones are *numerical*?**
+
+b. **Report the summary of the *diamonds* dataset by using function `summary()`.**
+
+c. **Report the average, minimum, and maximum price for the diamonds.**
+
+## Unusual Values in the *diamonds* dataset 
+
+Outliers are observations that are unusual; data points that don't seem to fit the pattern. Sometimes outliers are data entry errors; other times outliers suggest important information. When you have a lot of data, outliers are sometimes difficult to see in a histogram. For example, take the distribution of the `y` variable from the *diamonds* dataset. The only evidence of outliers is the unusually wide limits on the y-axis:
+
+```{r fig.align = 'center'}
+ggplot( diamonds ) +
+    geom_histogram( mapping = aes( x = y ), binwidth = 0.5 )
+```
+
+There are so many observations in the common bins that the rare bins are so short that you cann't see them (although maybe if you stare intently at 0 you'll spot something). To make it easy to see the unusual values, we need to zoom in to small values of the y-axis:
+
+```{r fig.align = 'center'}
+ggplot( diamonds ) +
+    geom_histogram( mapping = aes( x = y ), binwidth = 0.5 ) +
+    coord_cartesian( ylim = c( 0, 30 ) )
+```
+
+We also report the scatter plot for variable `y` vs `price`:
+```{r fig.align = 'center'}
+ggplot( data = diamonds, mapping = aes( x = y, y = price ) ) + 
+  geom_point( colour = 'blue' )
+```
+
+The `y` variable measures one of the three dimensions of these diamonds, in mm. We know that diamonds can’t have a width of 0mm, so these values must be incorrect. We might also suspect that measurements of 32mm and 59mm are implausible: those diamonds are over an inch long, but don’t cost hundreds of thousands of dollars!
+
+It’s good practice to repeat your analysis with and without the outliers. If they have minimal effect on the results, and you can’t figure out why they’re there, it’s reasonable to replace them with missing values, and move on. However, if they have a substantial effect on your results, you shouldn’t drop them without justification. You’ll need to figure out what caused them (e.g. a data entry error) and disclose that you removed them in your write-up.
+
+I recommend replacing the unusual values with missing values. The easiest way to do this is to use `mutate()` to replace the variable with a modified copy. You can use the `ifelse()` function to replace unusual values with `NA`:
+
+```{r}
+diamonds_2 = mutate( diamonds, y = ifelse( y ==  0 | y > 30, NA, y ) ) 
+```
+
+[`ifelse()`](https://rdrr.io/r/base/ifelse.html) has three arguments. The first argument test should be a logical vector. The result will contain the value of the second argument, `yes`, when test is `TRUE`, and the value of the third argument, `no`, when it is `FALSE`. 
+
+```{r fig.align = 'center'}
+ggplot( data = diamonds_2, mapping = aes( x = y, y = price ) ) + 
+  geom_point( colour = 'blue' )
+```
+
+To see the summary of the variable `y` with missing values:
+```{r}
+summary( diamonds_2 )
+```
+
+## Dealing with missing values
+
+Here we impute the missing values with *random* values (which is proportional to categories' records) by using the function `impute()` from R package **Hmisc** as follows: 
+```{r}
+diamonds_2 $ y = impute( diamonds_2 $ y, 'random' )
+```
+
+To see the summary of the variable `y`:
+```{r}
+summary( diamonds_2 $ y )
+```
+
+## Unusual Values in the variables `x` and `z`
+
+Here, in the *diamonds* dataset, we want to check if there is any unusual or outliers in the variables `x` and `z`. 
+
+**Your task here is to check if there is any unusual or outliers in the variables `x` and `z`. Follow the same steps at above for the variable `y`.**
+
+# Adult Dataset (50 points)
+
+We want to find out *which type of people can earn more than 50K per year*. Thus, the prediction task is to determine whether a person makes over $50K a year. For this classification task, in week 5, we will apply the *Decision Tree* as well as the *Random Forest* algorithm. 
+
+## Data Understanding
+
+You could find more information about this dataset here: [https://rdrr.io/cran/liver/man/adult.html](https://rdrr.io/cran/liver/man/adult.html). 
+
+The *adult* dataset is from the [US Census Bureau](https://www.census.gov) with the primary task to predict whether a given adult makes more than $50K a year based on attributes such as education, hours of work per week, etc. The target feature is *income* with two levels "<=50K" and ">50K", and the remaining 14 variables are predictors.
+
+The *adult* dataset, as a data frame, contains 48598 records (rows) with 15 variables/features (columns):
+
+* `age`: age in years (numerical).
+* `workclass`: a factor with 6 levels (categorical-nominal). 
+* `demogweight`: the demographics to describe a person (categorical-nominal).
+* `education`: a factor with 16 levels (categorical-nominal).
+* `education.num`: number of years of education (numerical-discrete).
+* `marital.status`: a factor with 5 levels (categorical-nominal).
+* `occupation`: a factor with 15 levels (categorical-nominal).
+* `relationship`: a factor with 6 levels (categorical-nominal).
+* `race`: a factor with 5 levels (categorical-nominal).
+* `gender`: a factor with levels "Female","Male" (categorical-binary).
+* `capital.gain`: capital gains  (numerical-discrete).
+* `capital.loss`: capital losses  (numerical-discrete).
+* `hours.per.week`: number of hours of work per week (numerical-discrete).
+* `native.country`: a factor with 42 levels (categorical-nominal).
+* `income`: yearly income as a factor with levels "<=50K" and ">50K" (categorical-binary).
+
+You can find more information related to this dataset at:
+
+[https://www.rdocumentation.org/packages/liver/versions/1.3/topics/adult](https://www.rdocumentation.org/packages/liver/versions/1.3/topics/adult)
+
+We import the dataset and report the structure of the dataset:
+
+```{r}
+data( adult ) 
+
+str( adult )
+```
+
+It shows the dataset contains `r nrow( adult )` records and `r ncol( adult )` variables/features.  The dataset has `r ncol( adult ) - 1` predictors along with a target variable `income` as a binary variable with two levels "<=50K" and ">50K".
+
+a. **Which of the variables in the dataset are *nominal*? And which ones are *numerical*?**
+
+b. **Report the summary of the *adult* dataset by using function `summary()`.**
+
+c. **Report the proportion of the people who earn more than 50K (`>50K`).**
+
+## Data Cleaning
+
+In the dataset, some of the categorical variables (`native.county` and `workclass`) have a lot of categories. Here, we reduce the number of factors. 
+
+Using `table()` for checking the frequency of the native country column.
+```{r}
+table( adult $ native.country )
+```
+
+We will group these countries together into continents by using function `fct_collapse`.
+```{r}
+Europe = c( "England", "France", "Germany", "Greece", "Holand-Netherlands", 
+            "Hungary", "Ireland", "Italy", "Poland", "Portugal", "Scotland", 
+            "Yugoslavia" )
+
+Asia = c( "China", "Hong", "India", "Iran", "Cambodia", "Japan", "Laos", 
+          "Philippines", "Vietnam", "Taiwan", "Thailand" )
+
+N.America = c( "Canada", "United-States", "Puerto-Rico" )
+
+S.America = c( "Columbia", "Cuba", "Dominican-Republic", "Ecuador", "El-Salvador", 
+             "Guatemala", "Haiti", "Honduras", "Mexico", "Nicaragua", 
+             "Outlying-US(Guam-USVI-etc)", "Peru", "Jamaica", "Trinadad&Tobago" )
+
+Other = c( "South" )
+
+adult $ native.country = fct_collapse( adult $ native.country, "Europe"    = Europe    )
+adult $ native.country = fct_collapse( adult $ native.country, "Asia"      = Asia      )
+adult $ native.country = fct_collapse( adult $ native.country, "N.America" = N.America )
+adult $ native.country = fct_collapse( adult $ native.country, "S.America" = S.America )
+adult $ native.country = fct_collapse( adult $ native.country, "Other"     = Other     )
+```
+
+Using `table()` for checking the frequency of the native country column.
+```{r}
+table( adult $ native.country )
+```
+
+For the variable `workclass`, we report the frequency of workclass as
+```{r}
+table( adult $ workclass )
+```
+
+We reduce two categories "Never-worked" and "Without-pay" to "Unemployed" as follows:
+```{r}
+adult $ workclass = fct_collapse( adult $ workclass, "Unemployed" = c( "Never-worked", "Without-pay" ) )
+```
+
+## Missing Values
+
+We can see from the output of the `summary()` function that variable `workclass` has a category of **?** with `r sum( adult$workclass=="?" )` records. The variable `native.country` also has a category of **?** with `r sum( adult$native.country=="?" )` records. Since these **?** are the missing values in the dataset, we convert them to `NA` values as follows:
+```{r message = FALSE }
+adult[ adult == "?" ] = NA
+```
+
+To remove the category "`?`"
+```{r message = FALSE }
+adult $ workclass      = factor( adult $ workclass     , levels = levels( adult $ workclass      )[ -1 ] )
+adult $ native.country = factor( adult $ native.country, levels = levels( adult $ native.country )[ -1 ] )
+adult $ occupation     = factor( adult $ occupation    , levels = levels( adult $ occupation     )[ -1 ] )
+```
+
+
+To visualize the missing values
+```{r fig.align = 'center'}
+gg_miss_var( adult, show_pct = TRUE )
+```
+
+The above plot shows that the variables `workclass`, `occupation`, and `native.country` have missing values. It shows that the variables `workclass`, `occupation`, and `native.country` have around less than 0.06 percent missing values and the variable `native.country` has around 0.02 percent missing values. 
+
+Here we impute the missing values with *random* values (which is proportional to categories' records) by using the function `impute()` from R package **Hmisc** as follows: 
+```{r}
+# impute missing values with random value
+adult $ workclass      = impute( adult $ workclass     , 'random' )
+adult $ native.country = impute( adult $ native.country, 'random' ) 
+adult $ occupation     = impute( adult $ occupation    , 'random' ) 
+```
+
+The below plot shows that all the missing values are imputed.
+```{r fig.align = 'center'}
+gg_miss_var( adult, show_pct = TRUE )
+```
+
+The `impute()` function imputes missing values using a user-defined statistical method (e.g. mean, median, max). Its default is *median*. For more advanced approaches, users could apply the `aregImpute()` function (from the R package **Hmisc**) which provides mean imputation using additive regression, bootstrapping, and predictive mean matching.
+
+We also can remove NA values from the *adult* dataset by using `na.omit()`. Note, we normally should not remove the missing values. It depends on the situation whether it's a good idea or not. You shouldn't always just drop NA values.
+
+## Outliers for variable `capital.loss`
+
+Here we want to check if there are any outliers in the variable `capital.loss` or not. For this, first, we report the summary of the variable `capital.loss` as follow:
+```{r}
+summary( adult $ capital.loss )
+```
+
+We also report the boxplot and histogram of the variable `capital.loss` as follow:
+```{r fig.align = 'center'}
+ggplot( adult ) +
+     geom_boxplot( aes( y = capital.loss ) )
+```
+
+```{r fig.align = 'center'}
+ggplot( adult ) +
+     geom_histogram( aes( x = capital.loss ), bins = 30, color = "blue", fill = "lightblue" )
+```
+
+**What would be your interpretation of the above outputs for the variable `capital.loss`? Are there any outliers in the variable `capital.loss`? If so, what would be a good strategy to deal with the outliers?**
+
+## Outliers for variable `capital.gain`
+
+Here we want to check if there is any outliers in the variable `capital.gain` or not. 
+
+a. **Similar to the previous part report the `summary`, `boxplot`, and `histogram` for the variable `capital.gain`.**
+
+b. **What would be your interpretation of the above outputs for the variable `capital.gain`? Are there any outliers in the variable `capital.gain`? If so, what would be a good strategy to deal with the outliers?**
+
+# **Bonus**: Business Understaning Stage for your main project (30 points)
+
+For data-driven business-making, it is vital to understand the problem to be solved. This may seem obvious, but business projects seldom come pre-packaged as clear and unambiguous data mining problems. 
+
+The Business Understanding stage represents a key part of the craft where the analysts' creativity plays a large role. Data Science has some things to say, as we will describe, but often the key to a great success is a creative problem formulation by some analyst regarding how to cast the business problem as one or more data science problems.  High-level knowledge of the fundamentals helps creative business analysts see novel formulations. The Business Understanding stage can be done by following steps:
+
+1. First, clearly enunciate the project objectives and requirements in terms of the business or research unit as a whole.
+2. Then, translate these goals and restrictions into the formulation of a problem that can be solved using data science.
+3. Finally, prepare a preliminary strategy for achieving these objectives.
+
+**Your task** for this part is to write a Business problem that you have (or you had) in your company. Write the problem done by following the above three steps for the Business Understanding stage and discuss it with your teammate. Each group should represent the result in the class for around 5 minutes. 
+
+Do you think the Business/Research problem that you have is interesting and can be solved using data science? If so, provide your reasons. Just remember that you could consider it as the main project of this course. It means it can cover 22 percent of your final grade. 
+
+If you have an interesting Business/Research problem, I highly recommend you define it as the main project of your course with your teammates. I think in this way this course for you would be more effective and I will support you.
+
+
+
